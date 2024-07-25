@@ -11,6 +11,7 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,8 @@ public class OrderService {
     private final WebClient.Builder webClientBuilder;
     private final ObservationRegistry observationRegistry;
     private final ApplicationEventPublisher applicationEventPublisher;
-
+    @Value("${inventory.url}")
+    private String inventoryUrl;
     public String placeOrder(OrderRequest orderRequest) {
         log.info("calling place order");
         Order order = new Order();
@@ -54,7 +56,7 @@ public class OrderService {
         inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
         return inventoryServiceObservation.observe(() -> {
             InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
-                    .uri("http://inventory-service.default.svc.cluster.local/api/inventory",
+                    .uri(inventoryUrl,
                             uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                     .retrieve()
                     .bodyToMono(InventoryResponse[].class)

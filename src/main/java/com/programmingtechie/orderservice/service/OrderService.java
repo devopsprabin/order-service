@@ -32,6 +32,7 @@ public class OrderService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public String placeOrder(OrderRequest orderRequest) {
+        log.info("calling place order");
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
